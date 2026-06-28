@@ -3,11 +3,11 @@ import { useGLTF } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { gsap } from 'gsap'
 
-const MODEL_URL = '/models/enchanted_crystal.glb'
+const MODEL_URL = '/models/enchanted_crystal_02.glb'
 
-// The model ships tiny (~0.14 units tall after its baked node transforms),
-// so scale it up to sit nicely in frame (~5 units tall).
-const TARGET_SCALE = 32
+// The model ships tiny (~0.019 units tall after its baked node transforms),
+// so scale it up to sit nicely in frame (~4.5 units tall).
+const TARGET_SCALE = 246
 
 export default function Crystal(props) {
   const group = useRef()
