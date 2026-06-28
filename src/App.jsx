@@ -30,11 +30,12 @@ export default function App() {
       <Loader />
       <div className="canvas-wrap">
         <Canvas
-          camera={{ position: [0, 1.3, 12], fov: 40 }}
+          camera={{ position: [0, 1.9, 11], fov: 46 }}
           gl={{ antialias: true, alpha: false }}
           dpr={[1, 2]}
           onCreated={(state) => {
-            state.camera.lookAt(0, 1.8, 0)
+            // Low camera near the water so foreground waves fill the frame.
+            state.camera.lookAt(0, 3.4, 0)
           }}
         >
           <Experience />
