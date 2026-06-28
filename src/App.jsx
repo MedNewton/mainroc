@@ -30,12 +30,13 @@ export default function App() {
       <Loader />
       <div className="canvas-wrap">
         <Canvas
-          camera={{ position: [0, 1.9, 11], fov: 46 }}
+          camera={{ position: [0, 1.6, 13], fov: 45, near: 0.1, far: 20000 }}
           gl={{ antialias: true, alpha: false }}
           dpr={[1, 2]}
           onCreated={(state) => {
-            // Low camera near the water so foreground waves fill the frame.
-            state.camera.lookAt(0, 3.4, 0)
+            // Low camera near the water, horizon a touch below centre so the
+            // starry sky fills the upper frame.
+            state.camera.lookAt(0, 2.8, 0)
           }}
         >
           <Experience />
