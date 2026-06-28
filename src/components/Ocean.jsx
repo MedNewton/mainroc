@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react'
+import { useRef, useMemo, useEffect } from 'react'
 import { extend, useThree, useFrame, useLoader } from '@react-three/fiber'
 import * as THREE from 'three'
 import { Water } from 'three/examples/jsm/objects/Water.js'
@@ -22,21 +22,27 @@ export default function Ocean({ sunDirection, position = [0, -2.6, 0] }) {
 
   const config = useMemo(
     () => ({
-      textureWidth: 512,
-      textureHeight: 512,
+      textureWidth: 1024,
+      textureHeight: 1024,
       waterNormals,
       sunDirection: sunDirection.clone().normalize(),
-      sunColor: 0xbcd6ff,
-      waterColor: 0x0a2a4f,
-      distortionScale: 3.4,
+      sunColor: 0x9fc6ff,
+      waterColor: 0x06182f,
+      distortionScale: 3.0,
       fog: true,
     }),
     [waterNormals, sunDirection],
   )
 
+  // Larger normal-map tiling → broader, calmer swells than the default.
+  useEffect(() => {
+    const w = ref.current
+    if (w) w.material.uniforms.size.value = 4.0
+  }, [])
+
   useFrame((_, delta) => {
     const w = ref.current
-    if (w) w.material.uniforms.time.value += delta * 0.55
+    if (w) w.material.uniforms.time.value += delta * 0.5
   })
 
   return (
