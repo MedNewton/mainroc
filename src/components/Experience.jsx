@@ -7,22 +7,16 @@ import {
   HueSaturation,
 } from '@react-three/postprocessing'
 import Crystal from './Crystal.jsx'
-import Ocean from './Ocean.jsx'
-import GradientSky from './GradientSky.jsx'
 
 const CRYSTAL_POS = [0, 3.6, 0]
 
-// A single, calm scene: a glowing crystal floating gently above an animated
-// Gerstner-wave ocean, beneath a dark night-blue sky.
+// A single, calm scene: just the glowing crystal floating gently in the
+// center against a dark night-blue backdrop.
 export default function Experience() {
   return (
     <>
-      <GradientSky />
-
-      {/* Animated shader ocean. */}
-      <Suspense fallback={null}>
-        <Ocean crystalPosition={CRYSTAL_POS} />
-      </Suspense>
+      {/* Solid dark backdrop so the crystal reads on its own. */}
+      <color attach="background" args={['#04122e']} />
 
       {/* Dim night ambience + cool fills so the crystal's facets read. */}
       <hemisphereLight args={['#3a5f93', '#02060f', 0.35]} />
