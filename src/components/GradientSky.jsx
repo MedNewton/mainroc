@@ -21,11 +21,13 @@ const fragment = /* glsl */ `
   uniform vec3 uGlowDir;
   void main() {
     vec3 dir = normalize(vDir);
-    float t = smoothstep(-0.05, 0.55, dir.y);
+    // Slow gradient so the visible sky stays clearly blue rather than going
+    // black near the top of the frame.
+    float t = smoothstep(-0.1, 1.1, dir.y);
     vec3 color = mix(uHorizon, uZenith, t);
-    // Soft glow toward the moonlight direction (behind the crystal).
+    // Broad soft glow toward the moonlight direction (behind the crystal).
     float g = max(dot(dir, normalize(uGlowDir)), 0.0);
-    color += uGlow * pow(g, 6.0);
+    color += uGlow * pow(g, 3.0);
     gl_FragColor = vec4(color, 1.0);
   }
 `
@@ -33,10 +35,10 @@ const fragment = /* glsl */ `
 export default function GradientSky() {
   const uniforms = useMemo(
     () => ({
-      uZenith: { value: new THREE.Color('#02060f') },
-      uHorizon: { value: new THREE.Color('#0a2649') },
-      uGlow: { value: new THREE.Color('#22507f') },
-      uGlowDir: { value: new THREE.Vector3(0, 0.18, -1) },
+      uZenith: { value: new THREE.Color('#081530') },
+      uHorizon: { value: new THREE.Color('#1d4474') },
+      uGlow: { value: new THREE.Color('#3f6fa6') },
+      uGlowDir: { value: new THREE.Vector3(0, 0.1, -1) },
     }),
     [],
   )
