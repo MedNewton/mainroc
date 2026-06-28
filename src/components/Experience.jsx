@@ -1,67 +1,69 @@
 import { Suspense, useMemo } from 'react'
-import { Float, Sparkles, AdaptiveDpr } from '@react-three/drei'
-import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
+import { Environment, Float, AdaptiveDpr } from '@react-three/drei'
+import {
+  EffectComposer,
+  Bloom,
+  Vignette,
+  HueSaturation,
+} from '@react-three/postprocessing'
 import * as THREE from 'three'
+import sky from '@pmndrs/assets/hdri/sky.exr'
 import Crystal from './Crystal.jsx'
 import Ocean from './Ocean.jsx'
-import GradientSky from './GradientSky.jsx'
 
-// The 3D scene: a glowing crystal floating above a reflective ocean,
-// beneath a moody low-sun sky.
+// A single, calm scene: a glowing crystal floating gently above the ocean,
+// beneath a deep-blue night sky (HDRI, bundled locally — no CDN fetch).
 export default function Experience() {
-  // Soft "moon" direction used for the ocean's specular highlight and the
-  // scene's key light — high and slightly behind, never a blown-out disk.
-  const sun = useMemo(() => new THREE.Vector3(0.2, 0.35, -1).normalize(), [])
+  // Direction of the brightest part of the sky, used for the ocean's
+  // specular highlight.
+  const sun = useMemo(() => new THREE.Vector3(0.3, 0.25, -1).normalize(), [])
 
   return (
     <>
-      {/* Dark navy gradient sky. */}
-      <GradientSky />
+      {/* A clean open-ocean sky HDRI, dimmed into a deep-blue twilight via a
+          low backgroundIntensity (this darkens the visible sky AND its
+          reflection in the water, while leaving the emissive crystal bright).
+          Bundled locally — no runtime CDN fetch. */}
+      <Environment
+        files={sky}
+        background
+        backgroundIntensity={0.32}
+        environmentIntensity={0.5}
+      />
 
       {/* Reflective sea. */}
       <Suspense fallback={null}>
         <Ocean sunDirection={sun} />
       </Suspense>
 
-      {/* Lighting: cool sky/ground ambient + a soft key light. */}
-      <hemisphereLight args={['#7ea0d6', '#04102a', 0.45]} />
-      <ambientLight intensity={0.12} />
-      <directionalLight
-        position={[sun.x * 50, sun.y * 50 + 30, sun.z * 50]}
-        intensity={0.9}
-        color="#cfe2ff"
-      />
-      {/* Cyan fill to push the crystal's glow. */}
-      <pointLight position={[0, 6, 6]} intensity={40} color="#5fd0ff" />
-      <pointLight position={[-5, 4, -3]} intensity={25} color="#2f6df6" />
+      {/* Subtle fill lighting on top of the HDRI to make the crystal read. */}
+      <ambientLight intensity={0.2} />
+      <pointLight position={[0, 6, 6]} intensity={45} color="#7fdcff" />
+      <pointLight position={[-5, 3, -3]} intensity={25} color="#2f6df6" />
 
-      {/* The floating crystal. */}
+      {/* The floating crystal — gentle vertical bob only. */}
       <Suspense fallback={null}>
-        <Float speed={1.1} rotationIntensity={0.12} floatIntensity={0.6}>
-          <Crystal position={[0, 4.6, 0]} />
+        <Float
+          speed={1.4}
+          rotationIntensity={0}
+          floatIntensity={1}
+          floatingRange={[-0.18, 0.18]}
+        >
+          <Crystal position={[0, 1.6, 0]} />
         </Float>
       </Suspense>
 
-      {/* Drifting motes of light around the crystal. */}
-      <Sparkles
-        count={50}
-        scale={[10, 8, 10]}
-        position={[0, 5, 0]}
-        size={2.5}
-        speed={0.25}
-        color="#bcd6ff"
-        opacity={0.5}
-      />
-
-      {/* Postprocessing: bloom for the glow, vignette for cinematic framing. */}
+      {/* Bloom for the glow, a touch of saturation for richer blues, and a
+          vignette for cinematic framing. */}
       <EffectComposer disableNormalPass>
         <Bloom
           mipmapBlur
-          intensity={0.85}
-          luminanceThreshold={0.65}
+          intensity={0.9}
+          luminanceThreshold={0.6}
           luminanceSmoothing={0.3}
         />
-        <Vignette eskil={false} offset={0.2} darkness={0.8} />
+        <HueSaturation saturation={0.18} />
+        <Vignette eskil={false} offset={0.2} darkness={0.85} />
       </EffectComposer>
 
       <AdaptiveDpr pixelated />
