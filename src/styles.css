@@ -387,16 +387,17 @@ a {
 }
 
 /* ---- Industries ---- */
+/* --ind-p is scroll progress (0 = light, 1 = dark), set from JS each frame. */
 .industries {
+  --ind-p: 0;
+  --ind-pct: calc(var(--ind-p) * 100%);
+  --ind-media-h: min(420px, 46vh);
   background-color: #ffffff;
+  background-color: color-mix(in oklab, #050609 var(--ind-pct), #ffffff);
   padding: 150px 40px 120px;
   text-align: center;
-  overflow: hidden;
-  transition: background-color 1s ease;
-}
-
-.industries--dark {
-  background-color: #050609;
+  /* clip, not hidden: an overflow-hidden ancestor disables position: sticky */
+  overflow: clip;
 }
 
 .ind-title {
@@ -404,7 +405,8 @@ a {
   font-weight: 500;
   line-height: 1.08;
   letter-spacing: -0.025em;
-  color: #fff;
+  color: #0a0a0a;
+  color: color-mix(in oklab, #ffffff var(--ind-pct), #0a0a0a);
 }
 
 .ind-sub {
@@ -414,7 +416,8 @@ a {
   gap: 12px;
   margin-top: 26px;
   font-size: 22px;
-  color: #e8ebf0;
+  color: #3a3f47;
+  color: color-mix(in oklab, #e8ebf0 var(--ind-pct), #3a3f47);
 }
 
 .ind-bullet {
@@ -424,37 +427,86 @@ a {
   background: #2b8bfd;
 }
 
-.ind-stage {
-  position: relative;
-  height: 600px;
+.ind-pin {
   margin-top: 40px;
+}
+
+.ind-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+/* --g (media growth), --v (visibility), --y (drift) are per-card scroll
+   progress values, set from JS each frame. */
+.ind-slot {
+  --g: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(calc(-50% + var(--y, 30px)));
+  opacity: var(--v, 0);
+  pointer-events: none;
+}
+
+.ind-slot--right {
+  left: calc(50% + 80px);
+  right: 13%;
+}
+
+.ind-slot--left {
+  left: 13%;
+  right: calc(50% + 80px);
 }
 
 .ind-line {
   position: absolute;
   left: 50%;
-  top: 60px;
-  bottom: 0;
+  top: 10vh;
+  bottom: 10vh;
   width: 2px;
-  background: repeating-linear-gradient(#fff 0 3px, transparent 3px 13px);
+  color: #0a0a0a;
+  color: color-mix(in oklab, #ffffff var(--ind-pct), #0a0a0a);
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    currentColor 14%,
+    currentColor 86%,
+    transparent 100%
+  );
   opacity: 0.85;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.45))
+    drop-shadow(0 0 14px rgba(255, 255, 255, 0.22));
 }
 
+/* --node-y is the spring offset, set from JS each frame. Corner ticks are
+   painted as 8 tiny gradients (2 per corner), like .cap-chip. */
 .ind-node {
   position: absolute;
   left: 50%;
-  top: 52%;
-  transform: translateX(-50%);
-  width: 15px;
-  height: 15px;
-  background: #fff;
+  top: 50%;
+  transform: translate(-50%, calc(-50% + var(--node-y, 0px)));
+  width: 22px;
+  height: 22px;
+  background-color: #050609;
+  background-image:
+    linear-gradient(#fff, #fff), linear-gradient(#fff, #fff),
+    linear-gradient(#fff, #fff), linear-gradient(#fff, #fff),
+    linear-gradient(#fff, #fff), linear-gradient(#fff, #fff),
+    linear-gradient(#fff, #fff), linear-gradient(#fff, #fff);
+  background-repeat: no-repeat;
+  background-position:
+    left top, left top,
+    right top, right top,
+    left bottom, left bottom,
+    right bottom, right bottom;
+  background-size:
+    7px 1.5px, 1.5px 7px,
+    7px 1.5px, 1.5px 7px,
+    7px 1.5px, 1.5px 7px,
+    7px 1.5px, 1.5px 7px;
 }
 
 .ind-card {
-  position: absolute;
-  left: calc(50% + 80px);
-  right: 13%;
-  top: 52%;
   text-align: left;
   background: #0c0f14;
   border: 1px solid #272c35;
@@ -470,7 +522,10 @@ a {
 }
 
 .ind-card-num {
-  padding: 9px 13px;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 44px;
   border: 1px solid #3c424d;
   font-size: 16px;
   color: #fff;
@@ -482,23 +537,27 @@ a {
   color: #fff;
 }
 
+.ind-card-media {
+  display: grid;
+  place-items: center;
+  height: calc(var(--g) * var(--ind-media-h));
+  overflow: hidden;
+  border-bottom: 1px solid
+    color-mix(in srgb, #272c35 calc(var(--g) * 100%), transparent);
+}
+
+.ind-card-asset {
+  width: min(55%, 340px);
+  aspect-ratio: 1 / 1;
+  background: #262b33;
+  opacity: var(--g);
+}
+
 .ind-card-body {
-  position: relative;
   display: flex;
   align-items: center;
   gap: 18px;
-  padding: 28px 28px 32px 66px;
-}
-
-.ind-card-body::before {
-  content: '';
-  position: absolute;
-  left: 46px;
-  top: -14px;
-  width: 18px;
-  height: 55px;
-  border-left: 1px solid #3c424d;
-  border-bottom: 1px solid #3c424d;
+  padding: 28px;
 }
 
 .ind-card-icon {
@@ -516,10 +575,491 @@ a {
   color: #c9cfd8;
 }
 
+/* ---- Case studies ---- */
+.cases {
+  margin-top: 180px;
+}
+
+.cases-title {
+  font-size: clamp(34px, 4vw, 76px);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: #fff;
+}
+
+.cases-sub {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 22px;
+  font-size: 20px;
+  color: #c9cfd8;
+}
+
+.cases-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  max-width: 1360px;
+  margin: 70px auto 0;
+  text-align: left;
+}
+
+.cs-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 340px;
+  padding: 18px;
+  background: #0c0f14;
+  border: 1px solid #272c35;
+  transition:
+    border-color 0.35s ease,
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cs-card:hover {
+  border-color: #3c424d;
+  transform: translateY(-4px);
+}
+
+.cs-media {
+  flex: 1;
+  min-height: 140px;
+  background: #262b33;
+}
+
+.cs-info {
+  padding-top: 18px;
+}
+
+.cs-tag {
+  display: inline-block;
+  padding: 5px 10px;
+  border: 1px solid #3c424d;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: #8b93a1;
+}
+
+.cs-name {
+  margin-top: 14px;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+
+.cs-desc {
+  margin-top: 8px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #9aa1ad;
+}
+
+.cases-cta {
+  margin-top: 150px;
+}
+
+.cta-title {
+  font-size: clamp(26px, 2.8vw, 46px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.cta-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 38px;
+}
+
+.btn--ghost {
+  background: transparent;
+  border: 1px solid #3c424d;
+  color: #fff;
+}
+
+@media (min-width: 901px) {
+  .cases-grid {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-areas:
+      'a a b b'
+      'a a c d'
+      'e e f f';
+    grid-auto-rows: 300px;
+  }
+
+  .cs-card {
+    min-height: 0;
+  }
+
+  .cs-card:nth-child(1) {
+    grid-area: a;
+  }
+
+  .cs-card:nth-child(2) {
+    grid-area: b;
+  }
+
+  .cs-card:nth-child(3) {
+    grid-area: c;
+  }
+
+  .cs-card:nth-child(4) {
+    grid-area: d;
+  }
+
+  .cs-card:nth-child(5) {
+    grid-area: e;
+  }
+
+  .cs-card:nth-child(6) {
+    grid-area: f;
+  }
+
+  .cs-card:nth-child(1) .cs-name {
+    font-size: 30px;
+  }
+}
+
+/* ---- Co-founding ---- */
+/* --cf-p is scroll progress (0 = dark, 1 = white), --cf-d the parallax
+   drift distance; both set from JS each frame. */
+.cofounding {
+  --cf-p: 0;
+  --cf-pct: calc(var(--cf-p) * 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* full viewport so the page can scroll the section top to ~0, letting
+     the crossfade reach pure white */
+  min-height: 100vh;
+  background-color: #ffffff;
+  background-color: color-mix(in oklab, #ffffff var(--cf-pct), #050609);
+  padding: 120px 24px 100px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.cf-chip {
+  padding: 7px 14px;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+  font-size: 14px;
+  color: #111;
+  opacity: var(--cf-p);
+  background-image:
+    linear-gradient(#111, #111), linear-gradient(#111, #111),
+    linear-gradient(#111, #111), linear-gradient(#111, #111),
+    linear-gradient(#111, #111), linear-gradient(#111, #111),
+    linear-gradient(#111, #111), linear-gradient(#111, #111);
+  background-repeat: no-repeat;
+  background-position:
+    left top, left top,
+    right top, right top,
+    left bottom, left bottom,
+    right bottom, right bottom;
+  background-size:
+    10px 1.5px, 1.5px 10px,
+    10px 1.5px, 1.5px 10px,
+    10px 1.5px, 1.5px 10px,
+    10px 1.5px, 1.5px 10px;
+}
+
+.cf-title {
+  margin-top: 34px;
+  font-size: clamp(38px, 4.8vw, 92px);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: #0a0a0a;
+  color: color-mix(in oklab, #0a0a0a var(--cf-pct), #ffffff);
+}
+
+.cf-sub {
+  margin-top: 26px;
+  max-width: 860px;
+  font-size: 22px;
+  line-height: 1.4;
+  color: #3a3f47;
+  color: color-mix(in oklab, #3a3f47 var(--cf-pct), #e8ebf0);
+}
+
+.cf-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 56px;
+}
+
+.btn--outline {
+  background: transparent;
+  border: 1px solid #0a0a0a;
+  color: #0a0a0a;
+}
+
+/* ---- Footer ---- */
+.footer {
+  display: flex;
+  flex-direction: column;
+  min-height: 50vh;
+  padding: 110px 40px 0;
+  background: #fff;
+  border-top: 1px solid #e3e6ea;
+  color: #0a0a0a;
+  overflow: clip;
+}
+
+.footer-main {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 60px;
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+}
+
+.footer-chip {
+  align-self: flex-start;
+  padding: 7px 14px;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+  font-size: 13px;
+  color: #111;
+  background-image:
+    linear-gradient(#111, #111), linear-gradient(#111, #111),
+    linear-gradient(#111, #111), linear-gradient(#111, #111),
+    linear-gradient(#111, #111), linear-gradient(#111, #111),
+    linear-gradient(#111, #111), linear-gradient(#111, #111);
+  background-repeat: no-repeat;
+  background-position:
+    left top, left top,
+    right top, right top,
+    left bottom, left bottom,
+    right bottom, right bottom;
+  background-size:
+    10px 1.5px, 1.5px 10px,
+    10px 1.5px, 1.5px 10px,
+    10px 1.5px, 1.5px 10px,
+    10px 1.5px, 1.5px 10px;
+}
+
+.footer-news {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.footer-title {
+  margin-top: 26px;
+  font-size: clamp(30px, 3vw, 54px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.footer-sub {
+  margin-top: 16px;
+  max-width: 400px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #5b626d;
+}
+
+.nl-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 34px;
+}
+
+/* Focus brackets: corner ticks fade in around the field, echoing the chip. */
+.nl-field {
+  position: relative;
+  display: inline-flex;
+}
+
+.nl-field::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  background-image:
+    linear-gradient(#111, #111), linear-gradient(#111, #111),
+    linear-gradient(#111, #111), linear-gradient(#111, #111),
+    linear-gradient(#111, #111), linear-gradient(#111, #111),
+    linear-gradient(#111, #111), linear-gradient(#111, #111);
+  background-repeat: no-repeat;
+  background-position:
+    left top, left top,
+    right top, right top,
+    left bottom, left bottom,
+    right bottom, right bottom;
+  background-size:
+    10px 1.5px, 1.5px 10px,
+    10px 1.5px, 1.5px 10px,
+    10px 1.5px, 1.5px 10px,
+    10px 1.5px, 1.5px 10px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.nl-field:focus-within::after {
+  opacity: 1;
+}
+
+.nl-input {
+  width: min(340px, 100%);
+  padding: 18px 20px;
+  border: 1px solid #c3c8cf;
+  border-radius: 0;
+  background: #fff;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+  font-size: 14px;
+  color: #0a0a0a;
+  transition: border-color 0.25s ease;
+}
+
+.nl-input::placeholder {
+  color: #8b93a1;
+}
+
+.nl-input:focus {
+  outline: none;
+  border-color: #0a0a0a;
+}
+
+.btn--blue {
+  border: none;
+  border-radius: 0;
+  background: #2b8bfd;
+  color: #fff;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.btn--blue:hover {
+  background: #1b78e8;
+}
+
+.nl-done {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 40px;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  color: #0a0a0a;
+}
+
+.footer-cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-col-title {
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: #8b93a1;
+}
+
+.footer-link {
+  margin-top: 16px;
+  font-size: 15px;
+  color: #3a3f47;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: #0a0a0a;
+}
+
+.footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  max-width: 1360px;
+  margin: 90px auto 0;
+  padding: 24px 0;
+  border-top: 1px solid #e3e6ea;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: #6f7683;
+}
+
+.footer-tag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-tag .ind-bullet {
+  width: 10px;
+  height: 10px;
+}
+
+.footer-legal {
+  display: flex;
+  gap: 28px;
+}
+
+.footer-legal a {
+  transition: color 0.2s ease;
+}
+
+.footer-legal a:hover {
+  color: #0a0a0a;
+}
+
+/* Giant blueprint wordmark, half-clipped by the page edge. */
+.footer-mark {
+  align-self: center;
+  margin-top: 30px;
+  font-size: clamp(60px, 16.5vw, 270px);
+  font-weight: 500;
+  line-height: 0.76;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+  color: #eef1f4;
+  transform: translateY(14%);
+}
+
+@supports (-webkit-text-stroke: 1px #000) {
+  .footer-mark {
+    color: transparent;
+    -webkit-text-stroke: 1.5px #b9c0ca;
+  }
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 900px) {
   .nav-links {
     display: none;
+  }
+
+  .navbar {
+    padding: 0 24px;
+  }
+
+  .get-started {
+    padding: 12px 20px;
+    font-size: 15px;
   }
 
   .hero-title-wrap {
@@ -551,21 +1091,64 @@ a {
     padding: 0 12px;
   }
 
-  .ind-stage {
-    height: 480px;
+  .industries {
+    --ind-media-h: min(260px, 38vh);
   }
 
-  .ind-card {
+  .ind-slot--left,
+  .ind-slot--right {
     left: 24px;
     right: 24px;
-    top: 46%;
   }
 
-  .ind-line {
-    top: 30px;
+  .cofounding {
+    padding: 110px 24px 100px;
   }
 
-  .ind-node {
-    top: 46%;
+  .cf-sub {
+    font-size: 17px;
+    padding: 0 12px;
+  }
+
+  .footer {
+    padding: 80px 24px 0;
+  }
+
+  .footer-main {
+    grid-template-columns: 1fr;
+    gap: 70px;
+  }
+
+  .footer-cols {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 44px;
+  }
+
+  .footer-bottom {
+    justify-content: center;
+    text-align: center;
+    margin-top: 70px;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Pure-vw font keeps text width proportional to the screen, so both hero
+     phrases always wrap to the same two lines and the swap stays aligned. */
+  .hero-title {
+    flex-wrap: wrap;
+    white-space: normal;
+    font-size: 11vw;
+    row-gap: 0;
+  }
+
+  .hero-title-wrap {
+    height: 26vw;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 320px;
   }
 }
